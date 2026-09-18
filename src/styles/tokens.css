@@ -1,0 +1,23 @@
+:root {
+  --color-background: #f5f7fb;
+  --color-surface: #fff;
+  --color-text: #172033;
+  --color-muted: #64748b;
+  --color-primary: #176b87;
+  --color-primary-strong: #0e5068;
+  --color-border: #d9e2ec;
+  --color-focus: #f59e0b;
+  --shadow-card: 0 12px 32px rgb(23 32 51 / 8%);
+  --radius-card: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --tap-target: 44px;
+  --content-width: 72rem;
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}

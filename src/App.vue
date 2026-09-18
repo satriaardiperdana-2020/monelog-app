@@ -1,18 +1,14 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+
+import AppShell from './components/AppShell.vue'
+
+const route = useRoute()
+const usesAppShell = computed(() => route.meta.requiresAuth)
 </script>
 
 <template>
-  <div class="app-shell">
-    <header class="app-header">
-      <RouterLink class="brand" to="/">Monelog</RouterLink>
-      <nav aria-label="Navigasi utama">
-        <RouterLink to="/">Beranda</RouterLink>
-      </nav>
-    </header>
-
-    <main class="app-main" tabindex="-1">
-      <RouterView />
-    </main>
-  </div>
+  <AppShell v-if="usesAppShell"><RouterView /></AppShell>
+  <RouterView v-else />
 </template>
