@@ -1,0 +1,10 @@
+import { expect, test } from '@playwright/test'
+
+test('loads the application shell', async ({ page }) => {
+  await page.goto('/')
+
+  await expect(page).toHaveTitle('Monelog')
+  await expect(
+    page.getByRole('heading', { name: 'Monelog siap dikembangkan' }),
+  ).toBeVisible()
+})
