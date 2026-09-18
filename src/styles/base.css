@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+
+html { background: var(--color-background); }
+
+body { min-width: 320px; margin: 0; overflow-x: hidden; }
+
+button, a { color: inherit; }
+button { font: inherit; }
+
+:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

@@ -1,0 +1,25 @@
+.app-shell { min-height: 100vh; }
+.app-shell__content { min-width: 0; }
+
+.app-shell__mobile-header {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-primary);
+}
+
+.app-shell__mobile-header p { margin: 0; font-size: 1.125rem; font-weight: 700; }
+
+.app-shell__main {
+  width: min(calc(100% - 2 * var(--space-4)), var(--content-width));
+  margin: 0 auto;
+  padding: var(--space-5) 0 calc(88px + var(--space-5));
+}
+
+@media (min-width: 768px) {
+  .app-shell { display: grid; grid-template-columns: 248px minmax(0, 1fr); }
+  .app-shell__mobile-header { display: none; }
+  .app-shell__main { width: min(calc(100% - 2 * var(--space-6)), var(--content-width)); padding: var(--space-6) 0; }
+}
