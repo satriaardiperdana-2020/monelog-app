@@ -1,6 +1,8 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 
+import { translate } from '../i18n'
+import { useAppStore } from '../stores/app'
 import { validateTransactionDraft } from '../utils/validation'
 
 const props = defineProps({
@@ -22,6 +24,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'submit'])
+const app = useAppStore()
 const draft = ref({ ...props.initialDraft })
 const errors = ref({})
 const dateInput = ref(null)
@@ -83,7 +86,7 @@ async function focusFirstInvalid() {
 }
 
 async function submit() {
-  const result = validateTransactionDraft(draft.value)
+  const result = validateTransactionDraft(draft.value, app.locale)
   errors.value = result.errors
   if (!result.valid) {
     await focusFirstInvalid()
@@ -103,44 +106,44 @@ async function submit() {
 <template>
   <form class="transaction-form" novalidate @submit.prevent="submit">
     <div class="transaction-form__field">
-      <label for="transaction-date">Tanggal</label>
+      <label for="transaction-date">{{ translate(app.locale, 'date') }}</label>
       <input id="transaction-date" ref="dateInput" v-model="draft.transaction_date" type="date" :max="maxDate || undefined" :aria-describedby="errors.transaction_date ? 'transaction-date-error' : undefined" :aria-invalid="Boolean(errors.transaction_date)">
       <p v-if="errors.transaction_date" id="transaction-date-error" class="field-error">{{ errors.transaction_date }}</p>
     </div>
 
     <fieldset class="transaction-form__field" :aria-describedby="errors.type ? 'transaction-type-error' : undefined">
-      <legend>Tipe</legend>
-      <label><input ref="typeInput" v-model="draft.type" type="radio" value="income"> Pemasukan</label>
-      <label><input v-model="draft.type" type="radio" value="expense"> Pengeluaran</label>
+      <legend>{{ translate(app.locale, 'transactionType') }}</legend>
+      <label><input ref="typeInput" v-model="draft.type" type="radio" value="income"> {{ translate(app.locale, 'income') }}</label>
+      <label><input v-model="draft.type" type="radio" value="expense"> {{ translate(app.locale, 'expense') }}</label>
       <p v-if="errors.type" id="transaction-type-error" class="field-error">{{ errors.type }}</p>
     </fieldset>
 
     <div class="transaction-form__field">
-      <label for="transaction-category">Kategori</label>
+      <label for="transaction-category">{{ translate(app.locale, 'category') }}</label>
       <select id="transaction-category" ref="categoryInput" v-model="draft.category_id" :aria-describedby="errors.category_id ? 'transaction-category-error' : undefined" :aria-invalid="Boolean(errors.category_id)">
-        <option value="">Pilih kategori</option>
+        <option value="">{{ translate(app.locale, 'selectCategory') }}</option>
         <option v-for="category in compatibleCategories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select>
       <p v-if="errors.category_id" id="transaction-category-error" class="field-error">{{ errors.category_id }}</p>
     </div>
 
     <div class="transaction-form__field">
-      <label for="transaction-amount">Jumlah</label>
+      <label for="transaction-amount">{{ translate(app.locale, 'amount') }}</label>
       <input id="transaction-amount" ref="amountInput" v-model="draft.amount" inputmode="decimal" autocomplete="off" :aria-describedby="errors.amount ? 'transaction-amount-error' : undefined" :aria-invalid="Boolean(errors.amount)">
-      <p class="field-hint">Contoh: 12500,00</p>
+      <p class="field-hint">{{ translate(app.locale, 'exampleAmount') }}</p>
       <p v-if="errors.amount" id="transaction-amount-error" class="field-error">{{ errors.amount }}</p>
     </div>
 
     <div class="transaction-form__field">
-      <label for="transaction-title">Judul</label>
+      <label for="transaction-title">{{ translate(app.locale, 'title') }}</label>
       <input id="transaction-title" ref="titleInput" v-model="draft.title" maxlength="200" :aria-describedby="errors.title ? 'transaction-title-error' : undefined" :aria-invalid="Boolean(errors.title)">
       <p v-if="errors.title" id="transaction-title-error" class="field-error">{{ errors.title }}</p>
     </div>
 
     <p v-if="submitError" class="transaction-form__submit-error" aria-live="assertive">{{ submitError }}</p>
     <div class="transaction-form__actions">
-      <button type="button" @click="emit('cancel')">Batal</button>
-      <button type="submit" :disabled="submitting">{{ submitting ? 'Menyimpan…' : 'Simpan' }}</button>
+      <button type="button" @click="emit('cancel')">{{ translate(app.locale, 'cancel') }}</button>
+      <button type="submit" :disabled="submitting">{{ submitting ? translate(app.locale, 'saving') : translate(app.locale, 'save') }}</button>
     </div>
   </form>
 </template>

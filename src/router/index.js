@@ -28,6 +28,12 @@ export function createMonelogRouter(history = createWebHistory(import.meta.env.B
         meta: { requiresAuth: true },
       },
       {
+        path: '/laporan',
+        name: 'reports',
+        component: () => import('../views/ReportsView.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
         path: '/hari/:date',
         name: 'day-detail',
         component: () => import('../views/DayDetailView.vue'),

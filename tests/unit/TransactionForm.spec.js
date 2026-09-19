@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import { createPinia } from 'pinia'
 
 import TransactionForm from '../../src/components/TransactionForm.vue'
 
@@ -11,6 +12,7 @@ const categories = [
 function mountForm(props = {}) {
   return mount(TransactionForm, {
     attachTo: document.body,
+    global: { plugins: [createPinia()] },
     props: {
       categories,
       initialDraft: {

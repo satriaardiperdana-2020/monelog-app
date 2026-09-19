@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import TransactionForm from '../components/TransactionForm.vue'
+import { translate } from '../i18n'
+import { useAppStore } from '../stores/app'
 import { listActiveCategories } from '../services/api/categories-api'
 import { useAuthStore } from '../stores/auth'
 import { useDailyStore } from '../stores/daily'
@@ -10,6 +12,7 @@ import { useTransactionsStore } from '../stores/transactions'
 import { isValidDate, todayInTimezone } from '../utils/dates'
 
 const auth = useAuthStore()
+const app = useAppStore()
 const daily = useDailyStore()
 const route = useRoute()
 const router = useRouter()
@@ -53,5 +56,5 @@ async function save(payload) {
 </script>
 
 <template>
-  <section aria-labelledby="create-transaction-title"><h1 id="create-transaction-title">Tambah transaksi</h1><TransactionForm :categories="categories" :initial-draft="initialDraft" :max-date="todayInTimezone(auth.user.timezone)" :submitting="submitting" :submit-error="submitError" @cancel="router.back()" @submit="save" /></section>
+  <section aria-labelledby="create-transaction-title"><h1 id="create-transaction-title">{{ translate(app.locale, 'addTransaction') }}</h1><TransactionForm :categories="categories" :initial-draft="initialDraft" :max-date="todayInTimezone(auth.user.timezone)" :submitting="submitting" :submit-error="submitError" @cancel="router.back()" @submit="save" /></section>
 </template>

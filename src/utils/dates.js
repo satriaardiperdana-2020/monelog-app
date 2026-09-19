@@ -31,13 +31,17 @@ export function isValidDate(value) {
   return day <= maximumDay
 }
 
-export function formatIndonesianDate(value) {
+export function formatDate(value, locale = 'id') {
   if (!isValidDate(value)) return ''
 
-  return new Intl.DateTimeFormat('id-ID', {
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'id-ID', {
     dateStyle: 'long',
     timeZone: 'UTC',
   }).format(new Date(`${value}T00:00:00.000Z`))
+}
+
+export function formatIndonesianDate(value) {
+  return formatDate(value, 'id')
 }
 
 /** Returns an earlier calendar date without interpreting the input in local time. */

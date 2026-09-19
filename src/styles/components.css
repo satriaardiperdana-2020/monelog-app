@@ -85,10 +85,21 @@
 .category-tabs button[aria-selected='true'] { color: var(--color-surface); background: var(--color-primary); }
 .category-form { display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
 .category-form label { font-weight: 700; }
-.category-form input { width: 100%; min-height: var(--tap-target); padding: 0 var(--space-3); border: 1px solid var(--color-border); border-radius: 8px; }
+.category-form input, .category-form select { width: 100%; min-height: var(--tap-target); padding: 0 var(--space-3); border: 1px solid var(--color-border); border-radius: 8px; }
 .category-form > div, .category-list li > div { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .category-form button, .category-list button { min-height: var(--tap-target); padding: 0 var(--space-3); color: var(--color-primary); background: var(--color-surface); border: 1px solid var(--color-primary); border-radius: 8px; font-weight: 700; cursor: pointer; }
 .category-form button[type='submit'], .category-list button:last-child { color: var(--color-surface); background: var(--color-primary); }
+
+.report-filter, .report-summary, .report-categories, .report-export-actions { display: grid; gap: .75rem; margin-block: 1.25rem; }
+.report-filter { max-width: 32rem; }
+.report-filter input { min-height: 44px; }
+.report-summary dl { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); margin: 0; }
+.report-summary dl div { padding: 1rem; border: 1px solid var(--color-border); border-radius: .75rem; }
+.report-summary dt { font-size: .875rem; }
+.report-summary dd { margin: .25rem 0 0; font-weight: 700; }
+.report-categories ul { display: grid; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+.report-categories li { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .75rem; border: 1px solid var(--color-border); border-radius: .5rem; }
+.report-export-actions__buttons { display: flex; flex-wrap: wrap; gap: .75rem; }
 .category-list { display: grid; gap: var(--space-2); padding: 0; margin: 0; list-style: none; }
 .category-list li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 64px; padding: var(--space-2) var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; }
 .trash-view, .settings-view { display: grid; gap: var(--space-5); max-width: 48rem; }

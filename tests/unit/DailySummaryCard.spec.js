@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it } from 'vitest'
+import { createPinia } from 'pinia'
 
 import DailySummaryCard from '../../src/components/DailySummaryCard.vue'
 
@@ -11,7 +12,7 @@ describe('DailySummaryCard', () => {
       props: {
         summary: { date: '2026-09-18', expense: '769500.00', income: '1000000.00' },
       },
-      global: { plugins: [router] },
+      global: { plugins: [createPinia(), router] },
     })
 
     expect(wrapper.text()).toContain('Pengeluaran')
