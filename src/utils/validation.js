@@ -22,7 +22,7 @@ export function validateTransactionDraft(draft, locale = 'id') {
   if (!['income', 'expense'].includes(draft.type)) {
     errors.type = translate(locale, 'invalidType')
   }
-  if (!draft.category_id) {
+  if (!Number.isSafeInteger(draft.category_id) || draft.category_id < 1) {
     errors.category_id = translate(locale, 'requiredCategory')
   }
   if (!amount) {

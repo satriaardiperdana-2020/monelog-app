@@ -21,8 +21,8 @@ beforeEach(() => {
 
 describe('trash store', () => {
   it('loads only deleted resources', async () => {
-    mocks.listTransactions.mockResolvedValue({ data: [{ id: 'transaction-1' }] })
-    mocks.listCategories.mockResolvedValue([{ id: 'category-1' }])
+    mocks.listTransactions.mockResolvedValue({ data: [{ id: 201 }] })
+    mocks.listCategories.mockResolvedValue([{ id: 101 }])
     const trash = useTrashStore()
 
     await trash.load()
@@ -33,18 +33,18 @@ describe('trash store', () => {
   })
 
   it('reloads Trash details before restores to use the newest version', async () => {
-    mocks.getTransaction.mockResolvedValue({ id: 'transaction-1', version: 7 })
-    mocks.restoreTransaction.mockResolvedValue({ id: 'transaction-1' })
-    mocks.getCategory.mockResolvedValue({ id: 'category-1', version: 8 })
-    mocks.restoreCategory.mockResolvedValue({ id: 'category-1' })
+    mocks.getTransaction.mockResolvedValue({ id: 201, version: 7 })
+    mocks.restoreTransaction.mockResolvedValue({ id: 201 })
+    mocks.getCategory.mockResolvedValue({ id: 101, version: 8 })
+    mocks.restoreCategory.mockResolvedValue({ id: 101 })
     const trash = useTrashStore()
 
-    await trash.restoreTransaction('transaction-1')
-    await trash.restoreCategory('category-1')
+    await trash.restoreTransaction(201)
+    await trash.restoreCategory(101)
 
-    expect(mocks.getTransaction).toHaveBeenCalledWith('transaction-1', { isDelete: true })
-    expect(mocks.restoreTransaction).toHaveBeenCalledWith('transaction-1', 7)
-    expect(mocks.getCategory).toHaveBeenCalledWith('category-1', { isDelete: true })
-    expect(mocks.restoreCategory).toHaveBeenCalledWith('category-1', 8)
+    expect(mocks.getTransaction).toHaveBeenCalledWith(201, { isDelete: true })
+    expect(mocks.restoreTransaction).toHaveBeenCalledWith(201, 7)
+    expect(mocks.getCategory).toHaveBeenCalledWith(101, { isDelete: true })
+    expect(mocks.restoreCategory).toHaveBeenCalledWith(101, 8)
   })
 })

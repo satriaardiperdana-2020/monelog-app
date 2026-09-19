@@ -35,7 +35,7 @@ describe('date and draft validation utilities', () => {
     const result = validateTransactionDraft({
       transaction_date: '2026-09-18',
       type: 'expense',
-      category_id: 'category-1',
+      category_id: 101,
       amount: '1234,5',
       title: ' Makan siang ',
     })
@@ -46,7 +46,7 @@ describe('date and draft validation utilities', () => {
       value: {
         transaction_date: '2026-09-18',
         type: 'expense',
-        category_id: 'category-1',
+        category_id: 101,
         amount: '1234.50',
         title: 'Makan siang',
       },

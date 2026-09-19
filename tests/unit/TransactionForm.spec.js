@@ -5,8 +5,8 @@ import { createPinia } from 'pinia'
 import TransactionForm from '../../src/components/TransactionForm.vue'
 
 const categories = [
-  { id: 'expense-category', name: 'Makan', type: 'expense' },
-  { id: 'income-category', name: 'Gaji', type: 'income' },
+  { id: 101, name: 'Makan', type: 'expense' },
+  { id: 102, name: 'Gaji', type: 'income' },
 ]
 
 function mountForm(props = {}) {
@@ -18,7 +18,7 @@ function mountForm(props = {}) {
       initialDraft: {
         transaction_date: '2026-09-18',
         type: 'expense',
-        category_id: 'expense-category',
+        category_id: 101,
         amount: '12500,5',
         title: 'Makan siang',
       },
@@ -52,24 +52,26 @@ describe('TransactionForm', () => {
   })
 
   it('emits exact money text and retains the request ID for an unchanged retry', async () => {
-    const randomUUID = vi.fn().mockReturnValue('request-1')
-    vi.stubGlobal('crypto', { randomUUID })
+    const getRandomValues = vi.fn((words) => words.set([0, 9001]))
+    vi.stubGlobal('crypto', { getRandomValues })
     const wrapper = mountForm()
 
     await wrapper.get('form').trigger('submit')
     await wrapper.get('form').trigger('submit')
 
     expect(wrapper.emitted('submit')).toEqual([
-      [{ transaction_date: '2026-09-18', type: 'expense', category_id: 'expense-category', amount: '12500.50', title: 'Makan siang', client_request_id: 'request-1' }],
-      [{ transaction_date: '2026-09-18', type: 'expense', category_id: 'expense-category', amount: '12500.50', title: 'Makan siang', client_request_id: 'request-1' }],
+      [{ transaction_date: '2026-09-18', type: 'expense', category_id: 101, amount: '12500.50', title: 'Makan siang', client_request_id: 9001 }],
+      [{ transaction_date: '2026-09-18', type: 'expense', category_id: 101, amount: '12500.50', title: 'Makan siang', client_request_id: 9001 }],
     ])
-    expect(randomUUID).toHaveBeenCalledTimes(1)
+    expect(getRandomValues).toHaveBeenCalledTimes(1)
     vi.unstubAllGlobals()
   })
 
   it('generates a new request ID after a draft change and emits cancel', async () => {
-    const randomUUID = vi.fn().mockReturnValueOnce('request-1').mockReturnValueOnce('request-2')
-    vi.stubGlobal('crypto', { randomUUID })
+    const getRandomValues = vi.fn()
+      .mockImplementationOnce((words) => words.set([0, 9001]))
+      .mockImplementationOnce((words) => words.set([0, 9002]))
+    vi.stubGlobal('crypto', { getRandomValues })
     const wrapper = mountForm()
 
     await wrapper.get('form').trigger('submit')
@@ -77,7 +79,7 @@ describe('TransactionForm', () => {
     await wrapper.get('form').trigger('submit')
     await wrapper.get('button[type="button"]').trigger('click')
 
-    expect(wrapper.emitted('submit')[1][0].client_request_id).toBe('request-2')
+    expect(wrapper.emitted('submit')[1][0].client_request_id).toBe(9002)
     expect(wrapper.emitted('cancel')).toHaveLength(1)
     vi.unstubAllGlobals()
   })

@@ -21,11 +21,11 @@ afterEach(() => {
 
 describe('request', () => {
   it('uses the API base URL, credentials, bearer token, and data envelope', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: { id: 'abc' } }))
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ data: { id: 1 } }))
     vi.stubGlobal('fetch', fetchMock)
     configureHttpAuth({ getAccessToken: () => 'memory-only-token' })
 
-    await expect(request('/me')).resolves.toEqual({ id: 'abc' })
+    await expect(request('/me')).resolves.toEqual({ id: 1 })
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/me',
@@ -71,14 +71,14 @@ describe('request', () => {
       .fn()
       .mockResolvedValueOnce(jsonResponse({ error: { code: 'expired', message: 'Expired' } }, 401))
       .mockResolvedValueOnce(jsonResponse({ error: { code: 'expired', message: 'Expired' } }, 401))
-      .mockResolvedValueOnce(jsonResponse({ data: { id: 'first' } }))
-      .mockResolvedValueOnce(jsonResponse({ data: { id: 'second' } }))
+      .mockResolvedValueOnce(jsonResponse({ data: { id: 1 } }))
+      .mockResolvedValueOnce(jsonResponse({ data: { id: 2 } }))
     vi.stubGlobal('fetch', fetchMock)
     configureHttpAuth({ refreshAccessToken, getAccessToken: () => 'new-token' })
 
     await expect(Promise.all([request('/me'), request('/categories')])).resolves.toEqual([
-      { id: 'first' },
-      { id: 'second' },
+      { id: 1 },
+      { id: 2 },
     ])
 
     expect(refreshAccessToken).toHaveBeenCalledTimes(1)

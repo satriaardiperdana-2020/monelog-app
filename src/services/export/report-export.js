@@ -1,6 +1,7 @@
 import { translate } from '../../i18n'
 import { formatDate } from '../../utils/dates'
 import { formatRupiah } from '../../utils/money'
+import { saveExportFile } from './export-file'
 
 const MONEY = /^-?(0|[1-9][0-9]{0,11})\.[0-9]{2}$/
 
@@ -54,16 +55,10 @@ function categoryRows(breakdown, locale) {
   ])
 }
 
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = url
-  anchor.download = filename
-  anchor.click()
-  URL.revokeObjectURL(url)
-}
-
-export async function exportExcelReport(report, { loadExcelJs = () => import('exceljs') } = {}) {
+export async function exportExcelReport(
+  report,
+  { loadExcelJs = () => import('exceljs'), saveFile = saveExportFile } = {},
+) {
   const module = await loadExcelJs()
   const ExcelJS = module.default || module
   const workbook = new ExcelJS.Workbook()
@@ -91,12 +86,23 @@ export async function exportExcelReport(report, { loadExcelJs = () => import('ex
     sheet.getCell(`C${rowNumber}`).numFmt = '[$Rp-id-ID] #,##0.00'
   }
 
-  const buffer = await workbook.xlsx.writeBuffer()
-  downloadBlob(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), filename)
+  const data = await workbook.xlsx.writeBuffer()
+  await saveFile({
+    data,
+    filename,
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
   return filename
 }
 
-export async function exportPdfReport(report, { loadAutoTable = () => import('jspdf-autotable'), loadJsPdf = () => import('jspdf') } = {}) {
+export async function exportPdfReport(
+  report,
+  {
+    loadAutoTable = () => import('jspdf-autotable'),
+    loadJsPdf = () => import('jspdf'),
+    saveFile = saveExportFile,
+  } = {},
+) {
   const [pdfModule, autoTableModule] = await Promise.all([loadJsPdf(), loadAutoTable()])
   const JsPdf = pdfModule.jsPDF || pdfModule.default
   const autoTable = autoTableModule.default || autoTableModule.autoTable
@@ -119,6 +125,6 @@ export async function exportPdfReport(report, { loadAutoTable = () => import('js
     head: [[translate(locale, 'category'), translate(locale, 'type'), translate(locale, 'total')]],
     startY: document.lastAutoTable.finalY + 10,
   })
-  document.save(filename)
+  await saveFile({ data: document.output('arraybuffer'), filename, mimeType: 'application/pdf' })
   return filename
 }

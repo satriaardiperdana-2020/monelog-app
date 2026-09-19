@@ -12,7 +12,7 @@ function createRouterWithAuth({ authenticated = false, expired = false } = {}) {
   setActivePinia(createPinia())
   const auth = useAuthStore()
   auth.accessToken = authenticated ? 'memory-token' : null
-  auth.user = authenticated ? { id: 'user-1' } : null
+  auth.user = authenticated ? { id: 1 } : null
   auth.sessionExpired = expired
   auth.bootstrap = vi.fn().mockResolvedValue(authenticated)
 
@@ -72,12 +72,21 @@ describe('router', () => {
     expect(isValidCalendarDate('2024-02-29')).toBe(true)
   })
 
-  it('does not authorize opaque resource IDs in the client', async () => {
+  it('accepts positive bigint resource IDs without making authorization decisions', async () => {
     const { router } = createRouterWithAuth({ authenticated: true })
 
-    await router.push('/transaksi/not-a-uuid/edit')
+    await router.push('/transaksi/201/edit')
     await router.isReady()
 
     expect(router.currentRoute.value.name).toBe('transaction-edit')
+  })
+
+  it.each(['not-an-id', '0', '-1', '9223372036854775808'])('rejects invalid bigint resource ID %s', async (id) => {
+    const { router } = createRouterWithAuth({ authenticated: true })
+
+    await router.push(`/transaksi/${id}/edit`)
+    await router.isReady()
+
+    expect(router.currentRoute.value.name).toBe('home')
   })
 })

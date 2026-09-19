@@ -15,7 +15,7 @@ describe('application shell', () => {
     setActivePinia(pinia)
     const auth = useAuthStore()
     auth.accessToken = 'memory-token'
-    auth.user = { id: 'user-1' }
+    auth.user = { id: 1 }
     auth.initialized = true
 
     const router = createMonelogRouter(createMemoryHistory())

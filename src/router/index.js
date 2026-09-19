@@ -2,6 +2,7 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 
 import { useAuthStore } from '../stores/auth'
 import { isValidDate } from '../utils/dates'
+import { isBigintId } from '../utils/ids'
 
 export const isValidCalendarDate = isValidDate
 
@@ -49,7 +50,7 @@ export function createMonelogRouter(history = createWebHistory(import.meta.env.B
         path: '/transaksi/:id/edit',
         name: 'transaction-edit',
         component: () => import('../views/TransactionEditView.vue'),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, validatesResourceId: true },
       },
       {
         path: '/kategori',
@@ -92,6 +93,10 @@ export function createMonelogRouter(history = createWebHistory(import.meta.env.B
     }
 
     if (to.meta.validatesDate && !isValidCalendarDate(to.params.date)) {
+      return { name: 'home' }
+    }
+
+    if (to.meta.validatesResourceId && !isBigintId(to.params.id)) {
       return { name: 'home' }
     }
 

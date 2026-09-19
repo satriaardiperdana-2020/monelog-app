@@ -29,20 +29,20 @@ describe('categories API', () => {
     mocks.request.mockResolvedValue({})
 
     await createCategory({ name: 'Makan', type: 'expense' })
-    await updateCategory('category-1', { name: 'Makan rumah', version: 2 })
-    await deleteCategory('category-1', 2)
+    await updateCategory(101, { name: 'Makan rumah', version: 2 })
+    await deleteCategory(101, 2)
 
     expect(mocks.request).toHaveBeenNthCalledWith(1, '/categories', { body: { name: 'Makan', type: 'expense' }, method: 'POST' })
-    expect(mocks.request).toHaveBeenNthCalledWith(2, '/categories/category-1', { body: { name: 'Makan rumah', version: 2 }, method: 'PATCH' })
-    expect(mocks.request).toHaveBeenNthCalledWith(3, '/categories/category-1', { headers: { 'If-Match': '"2"' }, method: 'DELETE' })
+    expect(mocks.request).toHaveBeenNthCalledWith(2, '/categories/101', { body: { name: 'Makan rumah', version: 2 }, method: 'PATCH' })
+    expect(mocks.request).toHaveBeenNthCalledWith(3, '/categories/101', { headers: { 'If-Match': '"2"' }, method: 'DELETE' })
   })
 
   it('restores with the current version body', async () => {
     mocks.request.mockResolvedValue({})
 
-    await restoreCategory('category-1', 8)
+    await restoreCategory(101, 8)
 
-    expect(mocks.request).toHaveBeenCalledWith('/categories/category-1/restore', {
+    expect(mocks.request).toHaveBeenCalledWith('/categories/101/restore', {
       body: { version: 8 },
       method: 'POST',
     })
