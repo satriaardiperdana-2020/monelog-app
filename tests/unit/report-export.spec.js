@@ -15,6 +15,7 @@ afterEach(() => vi.unstubAllGlobals())
 describe('report export', () => {
   it('creates deterministic sanitized filenames', () => {
     expect(reportFilename({ ...report, extension: 'xlsx' })).toBe('laporan-satria-test-2026-09-01-2026-09-19.xlsx')
+    expect(reportFilename({ ...report, extension: 'xlsx', locale: 'en' })).toBe('report-satria-test-2026-09-01-2026-09-19.xlsx')
   })
 
   it('writes monetary Excel cells as numbers', async () => {
@@ -68,5 +69,19 @@ describe('report export', () => {
       body: expect.arrayContaining([['Pengeluaran', 'Rp769.500,00']]),
     }))
     expect(document.save).toHaveBeenCalledWith('laporan-satria-test-2026-09-01-2026-09-19.pdf')
+  })
+
+  it('uses English labels and filenames for an English export', async () => {
+    const document = { lastAutoTable: { finalY: 60 }, save: vi.fn(), setFontSize: vi.fn(), text: vi.fn() }
+    const autoTable = vi.fn()
+
+    await exportPdfReport({ ...report, locale: 'en' }, {
+      loadAutoTable: async () => ({ default: autoTable }),
+      loadJsPdf: async () => ({ jsPDF: class JsPdf { constructor() { return document } } }),
+    })
+
+    expect(document.text).toHaveBeenCalledWith('Financial summary', 14, 18)
+    expect(autoTable).toHaveBeenCalledWith(document, expect.objectContaining({ head: [['Summary', 'Total']] }))
+    expect(document.save).toHaveBeenCalledWith('report-satria-test-2026-09-01-2026-09-19.pdf')
   })
 })

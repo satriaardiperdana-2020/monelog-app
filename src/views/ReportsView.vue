@@ -3,13 +3,16 @@ import { computed, ref, watch } from 'vue'
 
 import PageState from '../components/PageState.vue'
 import ReportExportActions from '../components/ReportExportActions.vue'
+import { translate } from '../i18n'
 import { useAdminSelectedUserStore } from '../stores/admin-selected-user'
+import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useReportsStore } from '../stores/reports'
-import { daysBefore, formatIndonesianDate, todayInTimezone } from '../utils/dates'
+import { daysBefore, formatDate, todayInTimezone } from '../utils/dates'
 import { formatRupiah } from '../utils/money'
 
 const auth = useAuthStore()
+const app = useAppStore()
 const adminSelectedUser = useAdminSelectedUserStore()
 const reports = useReportsStore()
 const startDate = ref('')
@@ -44,54 +47,54 @@ watch(() => adminSelectedUser.selectedUserId, () => {
 <template>
   <section class="reports-view" aria-labelledby="reports-title">
     <header>
-      <p class="eyebrow">Laporan</p>
-      <h1 id="reports-title">Ringkasan keuangan</h1>
-      <p v-if="isAdmin">Laporan dibuat untuk pengguna yang dipilih administrator.</p>
+      <p class="eyebrow">{{ translate(app.locale, 'report') }}</p>
+      <h1 id="reports-title">{{ translate(app.locale, 'financialSummary') }}</h1>
+      <p v-if="isAdmin">{{ app.locale === 'en' ? 'The report is created for the user selected by the administrator.' : 'Laporan dibuat untuk pengguna yang dipilih administrator.' }}</p>
     </header>
 
     <form class="report-filter" novalidate @submit.prevent="load">
-      <label for="report-start-date">Tanggal mulai</label>
+      <label for="report-start-date">{{ translate(app.locale, 'dateStart') }}</label>
       <input id="report-start-date" v-model="startDate" type="date" required>
-      <label for="report-end-date">Tanggal selesai</label>
+      <label for="report-end-date">{{ translate(app.locale, 'dateEnd') }}</label>
       <input id="report-end-date" v-model="endDate" type="date" required>
       <p v-if="reports.validationError" class="field-error" aria-live="assertive">{{ reports.validationError }}</p>
-      <button type="submit" :disabled="reports.status === 'loading'">Tampilkan laporan</button>
+      <button type="submit" :disabled="reports.status === 'loading'">{{ translate(app.locale, 'showReport') }}</button>
     </form>
 
     <PageState
       v-if="isAdmin && !adminSelectedUser.selectedUserId"
       state="empty"
-      title="Pilih pengguna terlebih dahulu"
-      description="Administrator hanya dapat mengekspor data pengguna yang sedang dipilih."
+      :title="app.locale === 'en' ? 'Select a user first' : 'Pilih pengguna terlebih dahulu'"
+      :description="app.locale === 'en' ? 'Administrators can export only the data of the currently selected user.' : 'Administrator hanya dapat mengekspor data pengguna yang sedang dipilih.'"
     />
-    <PageState v-else-if="reports.status === 'loading'" state="loading" title="Memuat laporan" />
+    <PageState v-else-if="reports.status === 'loading'" state="loading" :title="translate(app.locale, 'reportLoading')" />
     <PageState
       v-else-if="reports.status === 'error'"
       state="error"
-      title="Laporan belum dapat dimuat"
-      description="Periksa koneksi Anda, lalu coba lagi."
+      :title="translate(app.locale, 'reportUnavailable')"
+      :description="app.locale === 'en' ? 'Check your connection, then try again.' : 'Periksa koneksi Anda, lalu coba lagi.'"
       @retry="load"
     />
     <PageState
       v-else-if="reports.isEmpty"
       state="empty"
-      title="Belum ada transaksi aktif"
-      description="Tidak ada data aktif pada rentang tanggal ini."
+      :title="translate(app.locale, 'emptyActiveTransactions')"
+      :description="translate(app.locale, 'noReportData')"
     />
     <template v-else-if="reports.status === 'ready'">
       <section class="report-summary" aria-label="Ringkasan laporan">
-        <p>Periode {{ formatIndonesianDate(reports.summary.period.start_date) }} – {{ formatIndonesianDate(reports.summary.period.end_date) }}</p>
+        <p>{{ translate(app.locale, 'selectedPeriod') }} {{ formatDate(reports.summary.period.start_date, app.locale) }} – {{ formatDate(reports.summary.period.end_date, app.locale) }}</p>
         <dl>
-          <div><dt>Pemasukan</dt><dd>{{ formatRupiah(reports.summary.income) }}</dd></div>
-          <div><dt>Pengeluaran</dt><dd>{{ formatRupiah(reports.summary.expense) }}</dd></div>
-          <div><dt>Selisih</dt><dd>{{ formatRupiah(reports.summary.difference) }}</dd></div>
+          <div><dt>{{ translate(app.locale, 'income') }}</dt><dd>{{ formatRupiah(reports.summary.income) }}</dd></div>
+          <div><dt>{{ translate(app.locale, 'expense') }}</dt><dd>{{ formatRupiah(reports.summary.expense) }}</dd></div>
+          <div><dt>{{ translate(app.locale, 'difference') }}</dt><dd>{{ formatRupiah(reports.summary.difference) }}</dd></div>
         </dl>
       </section>
       <section class="report-categories" aria-labelledby="report-categories-title">
-        <h2 id="report-categories-title">Per kategori</h2>
+        <h2 id="report-categories-title">{{ translate(app.locale, 'reportByCategory') }}</h2>
         <ul>
           <li v-for="category in reports.breakdown.categories" :key="category.category_id">
-            <span>{{ category.name }} · {{ category.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}</span>
+            <span>{{ category.name }} · {{ category.type === 'income' ? translate(app.locale, 'income') : translate(app.locale, 'expense') }}</span>
             <strong>{{ formatRupiah(category.amount) }}</strong>
           </li>
         </ul>

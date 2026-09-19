@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 
+import { translate } from '../i18n'
+import { useAppStore } from '../stores/app'
 import { exportExcelReport, exportPdfReport } from '../services/export/report-export'
 
 const props = defineProps({
@@ -14,6 +16,7 @@ const props = defineProps({
 
 const exporting = ref('')
 const error = ref('')
+const app = useAppStore()
 
 async function exportReport(type) {
   exporting.value = type
@@ -21,6 +24,7 @@ async function exportReport(type) {
   const report = {
     breakdown: props.breakdown,
     endDate: props.endDate,
+    locale: app.locale,
     startDate: props.startDate,
     summary: props.summary,
     targetLabel: props.targetLabel,
@@ -29,7 +33,7 @@ async function exportReport(type) {
     if (type === 'excel') await exportExcelReport(report)
     else await exportPdfReport(report)
   } catch {
-    error.value = 'Ekspor belum dapat dibuat. Coba lagi.'
+    error.value = translate(app.locale, 'errorExport')
   } finally {
     exporting.value = ''
   }
@@ -38,15 +42,15 @@ async function exportReport(type) {
 
 <template>
   <section class="report-export-actions" aria-labelledby="report-export-title">
-    <h2 id="report-export-title">Ekspor laporan</h2>
-    <p>Unduh laporan untuk periode yang dipilih.</p>
+    <h2 id="report-export-title">{{ translate(app.locale, 'exportReport') }}</h2>
+    <p>{{ translate(app.locale, 'exportDescription') }}</p>
     <p v-if="error" class="field-error" aria-live="assertive">{{ error }}</p>
     <div class="report-export-actions__buttons">
       <button type="button" :disabled="disabled || Boolean(exporting)" @click="exportReport('excel')">
-        {{ exporting === 'excel' ? 'Membuat Excel…' : 'Unduh Excel' }}
+        {{ exporting === 'excel' ? translate(app.locale, 'makingExcel') : translate(app.locale, 'downloadExcel') }}
       </button>
       <button type="button" :disabled="disabled || Boolean(exporting)" @click="exportReport('pdf')">
-        {{ exporting === 'pdf' ? 'Membuat PDF…' : 'Unduh PDF' }}
+        {{ exporting === 'pdf' ? translate(app.locale, 'makingPdf') : translate(app.locale, 'downloadPdf') }}
       </button>
     </div>
   </section>

@@ -1,10 +1,11 @@
-import { formatIndonesianDate } from '../../utils/dates'
+import { translate } from '../../i18n'
+import { formatDate } from '../../utils/dates'
 import { formatRupiah } from '../../utils/money'
 
 const MONEY = /^-?(0|[1-9][0-9]{0,11})\.[0-9]{2}$/
 
-function displayType(type) {
-  return type === 'income' ? 'Pemasukan' : 'Pengeluaran'
+function displayType(type, locale) {
+  return type === 'income' ? translate(locale, 'income') : translate(locale, 'expense')
 }
 
 function safeText(value) {
@@ -33,22 +34,22 @@ function slug(value) {
   return normalized.slice(0, 60) || 'pengguna'
 }
 
-export function reportFilename({ endDate, extension, startDate, targetLabel }) {
-  return `laporan-${slug(targetLabel)}-${startDate}-${endDate}.${extension}`
+export function reportFilename({ endDate, extension, locale = 'id', startDate, targetLabel }) {
+  return `${locale === 'en' ? 'report' : 'laporan'}-${slug(targetLabel)}-${startDate}-${endDate}.${extension}`
 }
 
-function summaryRows(summary) {
+function summaryRows(summary, locale) {
   return [
-    ['Pemasukan', summary.income],
-    ['Pengeluaran', summary.expense],
-    ['Selisih', summary.difference],
+    [translate(locale, 'income'), summary.income],
+    [translate(locale, 'expense'), summary.expense],
+    [translate(locale, 'difference'), summary.difference],
   ]
 }
 
-function categoryRows(breakdown) {
+function categoryRows(breakdown, locale) {
   return (breakdown.categories || []).map((category) => [
     safeText(category.name),
-    displayType(category.type),
+    displayType(category.type, locale),
     category.amount,
   ])
 }
@@ -66,21 +67,22 @@ export async function exportExcelReport(report, { loadExcelJs = () => import('ex
   const module = await loadExcelJs()
   const ExcelJS = module.default || module
   const workbook = new ExcelJS.Workbook()
-  const sheet = workbook.addWorksheet('Laporan')
+  const locale = report.locale === 'en' ? 'en' : 'id'
+  const sheet = workbook.addWorksheet(translate(locale, 'report'))
   const filename = reportFilename({ ...report, extension: 'xlsx' })
 
   sheet.columns = [{ width: 28 }, { width: 20 }, { width: 20 }]
-  sheet.addRow(['Laporan Keuangan'])
-  sheet.addRow(['Periode', `${report.startDate} s.d. ${report.endDate}`])
-  sheet.addRow(['Pengguna', safeText(report.targetLabel)])
+  sheet.addRow([translate(locale, 'financialSummary')])
+  sheet.addRow([translate(locale, 'selectedPeriod'), `${report.startDate} – ${report.endDate}`])
+  sheet.addRow([translate(locale, 'user'), safeText(report.targetLabel)])
   sheet.addRow([])
-  sheet.addRow(['Ringkasan', '', ''])
-  for (const [label, amount] of summaryRows(report.summary)) {
+  sheet.addRow([translate(locale, 'summary'), '', ''])
+  for (const [label, amount] of summaryRows(report.summary, locale)) {
     sheet.addRow([label, amountAsExcelNumber(amount)])
   }
   sheet.addRow([])
-  sheet.addRow(['Kategori', 'Tipe', 'Jumlah'])
-  for (const [name, type, amount] of categoryRows(report.breakdown)) {
+  sheet.addRow([translate(locale, 'category'), translate(locale, 'type'), translate(locale, 'total')])
+  for (const [name, type, amount] of categoryRows(report.breakdown, locale)) {
     sheet.addRow([name, type, amountAsExcelNumber(amount)])
   }
 
@@ -99,21 +101,22 @@ export async function exportPdfReport(report, { loadAutoTable = () => import('js
   const JsPdf = pdfModule.jsPDF || pdfModule.default
   const autoTable = autoTableModule.default || autoTableModule.autoTable
   const document = new JsPdf()
+  const locale = report.locale === 'en' ? 'en' : 'id'
   const filename = reportFilename({ ...report, extension: 'pdf' })
 
   document.setFontSize(16)
-  document.text('Laporan Keuangan', 14, 18)
+  document.text(translate(locale, 'financialSummary'), 14, 18)
   document.setFontSize(10)
-  document.text(`Pengguna: ${report.targetLabel}`, 14, 25)
-  document.text(`Periode: ${formatIndonesianDate(report.startDate)} – ${formatIndonesianDate(report.endDate)}`, 14, 31)
+  document.text(`${translate(locale, 'user')}: ${report.targetLabel}`, 14, 25)
+  document.text(`${translate(locale, 'selectedPeriod')}: ${formatDate(report.startDate, locale)} – ${formatDate(report.endDate, locale)}`, 14, 31)
   autoTable(document, {
-    body: summaryRows(report.summary).map(([label, amount]) => [label, formatRupiah(amount)]),
-    head: [['Ringkasan', 'Jumlah']],
+    body: summaryRows(report.summary, locale).map(([label, amount]) => [label, formatRupiah(amount)]),
+    head: [[translate(locale, 'summary'), translate(locale, 'total')]],
     startY: 38,
   })
   autoTable(document, {
-    body: categoryRows(report.breakdown).map(([name, type, amount]) => [name, type, formatRupiah(amount)]),
-    head: [['Kategori', 'Tipe', 'Jumlah']],
+    body: categoryRows(report.breakdown, locale).map(([name, type, amount]) => [name, type, formatRupiah(amount)]),
+    head: [[translate(locale, 'category'), translate(locale, 'type'), translate(locale, 'total')]],
     startY: document.lastAutoTable.finalY + 10,
   })
   document.save(filename)

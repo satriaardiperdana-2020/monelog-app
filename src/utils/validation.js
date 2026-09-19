@@ -1,4 +1,5 @@
 import { isValidDate } from './dates'
+import { translate } from '../i18n'
 import { normalizeMoney } from './money'
 
 export function requiredText(value, { maxLength = '', label = 'Field' } = {}) {
@@ -11,21 +12,21 @@ export function requiredText(value, { maxLength = '', label = 'Field' } = {}) {
 }
 
 /** Validates the client-side transaction draft and preserves exact money strings. */
-export function validateTransactionDraft(draft) {
+export function validateTransactionDraft(draft, locale = 'id') {
   const errors = {}
   const amount = normalizeMoney(draft.amount)
 
   if (!isValidDate(draft.transaction_date)) {
-    errors.transaction_date = 'Tanggal tidak valid.'
+    errors.transaction_date = translate(locale, 'invalidDate')
   }
   if (!['income', 'expense'].includes(draft.type)) {
-    errors.type = 'Tipe transaksi tidak valid.'
+    errors.type = translate(locale, 'invalidType')
   }
   if (!draft.category_id) {
-    errors.category_id = 'Kategori wajib dipilih.'
+    errors.category_id = translate(locale, 'requiredCategory')
   }
   if (!amount) {
-    errors.amount = 'Jumlah harus lebih dari nol dengan maksimal dua desimal.'
+    errors.amount = translate(locale, 'invalidAmount')
   }
 
   const titleError = requiredText(draft.title, { maxLength: 200, label: 'Judul' })

@@ -4,12 +4,15 @@ import { RouterLink } from 'vue-router'
 
 import DailySummaryCard from '../components/DailySummaryCard.vue'
 import PageState from '../components/PageState.vue'
+import { translate } from '../i18n'
+import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useDailyStore } from '../stores/daily'
-import { formatIndonesianDate } from '../utils/dates'
+import { formatDate } from '../utils/dates'
 import { formatRupiah } from '../utils/money'
 
 const auth = useAuthStore()
+const app = useAppStore()
 const daily = useDailyStore()
 const today = computed(() => daily.todaySummary)
 
@@ -24,11 +27,11 @@ watch(() => auth.user?.timezone, loadSummaries, { immediate: true })
   <section class="home-view" aria-labelledby="home-title">
     <header class="home-view__header">
       <div>
-        <p class="eyebrow">Ringkasan hari ini</p>
-        <h1 id="home-title">{{ formatIndonesianDate(daily.today) || 'Catatan Keuangan' }}</h1>
+        <p class="eyebrow">{{ translate(app.locale, 'todaySummary') }}</p>
+        <h1 id="home-title">{{ formatDate(daily.today, app.locale) || translate(app.locale, 'appName') }}</h1>
       </div>
       <RouterLink class="home-view__add" :to="{ name: 'transaction-create', query: { tanggal: daily.today } }">
-        Tambah
+        {{ app.locale === 'en' ? 'Add' : 'Tambah' }}
       </RouterLink>
     </header>
 
@@ -48,28 +51,28 @@ watch(() => auth.user?.timezone, loadSummaries, { immediate: true })
     <template v-else>
       <section class="today-summary" aria-label="Total hari ini">
         <div>
-          <span>Pengeluaran</span>
+          <span>{{ translate(app.locale, 'expense') }}</span>
           <strong>{{ formatRupiah(today.expense) }}</strong>
         </div>
         <div>
-          <span>Pemasukan</span>
+          <span>{{ translate(app.locale, 'income') }}</span>
           <strong>{{ formatRupiah(today.income) }}</strong>
         </div>
       </section>
 
       <section class="home-view__history" aria-labelledby="history-title">
-        <h2 id="history-title">Sebelumnya</h2>
+        <h2 id="history-title">{{ translate(app.locale, 'earlier') }}</h2>
         <PageState
           v-if="daily.earlierSummaries.length === 0"
           state="empty"
-          title="Belum ada catatan sebelumnya"
-          description="Tambahkan transaksi untuk mulai melihat ringkasan harian."
+          :title="translate(app.locale, 'noEarlierRecords')"
+          :description="app.locale === 'en' ? 'Add a transaction to see daily summaries.' : 'Tambahkan transaksi untuk mulai melihat ringkasan harian.'"
         />
         <div v-else class="daily-summary-list">
           <DailySummaryCard v-for="summary in daily.earlierSummaries" :key="summary.date" :summary="summary" />
         </div>
         <button v-if="daily.nextCursor" class="home-view__more" type="button" :disabled="daily.status === 'loading-more'" @click="daily.loadMore">
-          {{ daily.status === 'loading-more' ? 'Memuat…' : 'Muat lagi' }}
+          {{ daily.status === 'loading-more' ? translate(app.locale, 'loading') : (app.locale === 'en' ? 'Load more' : 'Muat lagi') }}
         </button>
       </section>
     </template>
