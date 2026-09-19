@@ -35,22 +35,22 @@ beforeEach(() => {
 describe('auth store', () => {
   it('keeps the access token in memory and loads /me after login', async () => {
     mocks.login.mockResolvedValue({ access_token: 'memory-token' })
-    mocks.getMe.mockResolvedValue({ id: 'user-1', email: 'user@example.com' })
+    mocks.getMe.mockResolvedValue({ id: 1, email: 'user@example.com' })
     const auth = useAuthStore()
 
     await expect(auth.login({ email: 'user@example.com', password: 'password' })).resolves.toEqual({
-      id: 'user-1',
+      id: 1,
       email: 'user@example.com',
     })
 
     expect(auth.accessToken).toBe('memory-token')
-    expect(auth.user).toEqual({ id: 'user-1', email: 'user@example.com' })
+    expect(auth.user).toEqual({ id: 1, email: 'user@example.com' })
     expect(mocks.getMe).toHaveBeenCalledTimes(1)
   })
 
   it('uses refresh then /me during browser-reload bootstrap', async () => {
     mocks.refresh.mockResolvedValue({ access_token: 'refreshed-token' })
-    mocks.getMe.mockResolvedValue({ id: 'user-1' })
+    mocks.getMe.mockResolvedValue({ id: 1 })
     const auth = useAuthStore()
 
     await expect(auth.bootstrap()).resolves.toBe(true)
@@ -110,7 +110,7 @@ describe('auth store', () => {
     mocks.logout.mockResolvedValue(undefined)
     const auth = useAuthStore()
     auth.accessToken = 'memory-token'
-    auth.user = { id: 'user-1' }
+    auth.user = { id: 1 }
 
     await auth.logout()
 
@@ -119,9 +119,9 @@ describe('auth store', () => {
   })
 
   it('updates the profile timezone with the current version', async () => {
-    mocks.updateMe.mockResolvedValue({ id: 'user-1', timezone: 'Asia/Makassar', version: 4 })
+    mocks.updateMe.mockResolvedValue({ id: 1, timezone: 'Asia/Makassar', version: 4 })
     const auth = useAuthStore()
-    auth.user = { id: 'user-1', timezone: 'Asia/Jakarta', version: 3 }
+    auth.user = { id: 1, timezone: 'Asia/Jakarta', version: 3 }
 
     await auth.updateProfile('Asia/Makassar')
 

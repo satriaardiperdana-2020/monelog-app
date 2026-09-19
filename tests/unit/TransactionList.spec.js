@@ -9,12 +9,12 @@ describe('TransactionList', () => {
     const router = createRouter({ history: createMemoryHistory(), routes: [] })
     const wrapper = mount(TransactionList, {
       props: {
-        items: [{ id: 'transaction-1', title: 'Makan siang', type: 'expense', amount: '25000.00' }],
+        items: [{ id: 201, title: 'Makan siang', type: 'expense', amount: '25000.00' }],
       },
       global: { plugins: [router] },
     })
 
-    expect(wrapper.get('a').attributes('href')).toBe('/transaksi/transaction-1/edit')
+    expect(wrapper.get('a').attributes('href')).toBe('/transaksi/201/edit')
     expect(wrapper.text()).toContain('Makan siang')
     expect(wrapper.text()).toContain('Pengeluaran')
     expect(wrapper.text()).toContain('− Rp25.000,00')

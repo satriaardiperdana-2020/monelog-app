@@ -29,26 +29,26 @@ describe('transactions API', () => {
     const createPayload = {
       transaction_date: '2026-09-18',
       type: 'expense',
-      category_id: 'category-1',
+      category_id: 101,
       amount: '12.50',
       title: 'Makan',
-      client_request_id: 'request-1',
+      client_request_id: 9001,
     }
     mocks.request.mockResolvedValue({})
 
     await createTransaction(createPayload)
-    await updateTransaction('transaction-1', { ...createPayload, version: 3 })
-    await deleteTransaction('transaction-1', 3)
+    await updateTransaction(201, { ...createPayload, version: 3 })
+    await deleteTransaction(201, 3)
 
     expect(mocks.request).toHaveBeenNthCalledWith(1, '/transactions', {
       body: createPayload,
       method: 'POST',
     })
-    expect(mocks.request).toHaveBeenNthCalledWith(2, '/transactions/transaction-1', {
+    expect(mocks.request).toHaveBeenNthCalledWith(2, '/transactions/201', {
       body: { ...createPayload, version: 3 },
       method: 'PATCH',
     })
-    expect(mocks.request).toHaveBeenNthCalledWith(3, '/transactions/transaction-1', {
+    expect(mocks.request).toHaveBeenNthCalledWith(3, '/transactions/201', {
       headers: { 'If-Match': '"3"' },
       method: 'DELETE',
     })
@@ -57,9 +57,9 @@ describe('transactions API', () => {
   it('restores with the freshly supplied version in the request body', async () => {
     mocks.request.mockResolvedValue({})
 
-    await restoreTransaction('transaction-1', 7)
+    await restoreTransaction(201, 7)
 
-    expect(mocks.request).toHaveBeenCalledWith('/transactions/transaction-1/restore', {
+    expect(mocks.request).toHaveBeenCalledWith('/transactions/201/restore', {
       body: { version: 7 },
       method: 'POST',
     })

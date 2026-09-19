@@ -13,14 +13,14 @@ beforeEach(() => {
 
 describe('categories store', () => {
   it('keeps active income and expense lists isolated', async () => {
-    mocks.listCategories.mockResolvedValueOnce([{ id: 'expense', type: 'expense' }]).mockResolvedValueOnce([{ id: 'income', type: 'income' }])
+    mocks.listCategories.mockResolvedValueOnce([{ id: 101, type: 'expense' }]).mockResolvedValueOnce([{ id: 102, type: 'income' }])
     const categories = useCategoriesStore()
 
     await categories.load('expense')
     await categories.load('income')
 
-    expect(categories.byType.expense).toEqual([{ id: 'expense', type: 'expense' }])
-    expect(categories.byType.income).toEqual([{ id: 'income', type: 'income' }])
+    expect(categories.byType.expense).toEqual([{ id: 101, type: 'expense' }])
+    expect(categories.byType.income).toEqual([{ id: 102, type: 'income' }])
     expect(mocks.listCategories).toHaveBeenCalledWith({ isDelete: false, type: 'income' })
   })
 
@@ -30,9 +30,9 @@ describe('categories store', () => {
     await categories.load('expense')
 
     expect(categories.statusByType.expense).toBe('error')
-    await categories.update('category-1', { name: 'Makan', version: 2 })
-    await categories.delete('category-1', 2)
-    expect(mocks.updateCategory).toHaveBeenCalledWith('category-1', { name: 'Makan', version: 2 })
-    expect(mocks.deleteCategory).toHaveBeenCalledWith('category-1', 2)
+    await categories.update(101, { name: 'Makan', version: 2 })
+    await categories.delete(101, 2)
+    expect(mocks.updateCategory).toHaveBeenCalledWith(101, { name: 'Makan', version: 2 })
+    expect(mocks.deleteCategory).toHaveBeenCalledWith(101, 2)
   })
 })

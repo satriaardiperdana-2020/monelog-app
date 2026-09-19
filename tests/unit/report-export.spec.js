@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { exportExcelReport, exportPdfReport, reportFilename } from '../../src/services/export/report-export'
 
@@ -10,15 +10,13 @@ const report = {
   targetLabel: 'Satria / Test',
 }
 
-afterEach(() => vi.unstubAllGlobals())
-
 describe('report export', () => {
   it('creates deterministic sanitized filenames', () => {
     expect(reportFilename({ ...report, extension: 'xlsx' })).toBe('laporan-satria-test-2026-09-01-2026-09-19.xlsx')
     expect(reportFilename({ ...report, extension: 'xlsx', locale: 'en' })).toBe('report-satria-test-2026-09-01-2026-09-19.xlsx')
   })
 
-  it('writes monetary Excel cells as numbers', async () => {
+  it('writes monetary Excel cells as numbers and delegates saving', async () => {
     const rows = []
     const cells = new Map()
     const sheet = {
@@ -34,54 +32,67 @@ describe('report export', () => {
       addWorksheet: vi.fn(() => sheet),
       xlsx: { writeBuffer: vi.fn().mockResolvedValue(new Uint8Array([1])) },
     }
-    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:test'), revokeObjectURL: vi.fn() })
-    vi.spyOn(document, 'createElement').mockReturnValue({ click: vi.fn() })
+    const saveFile = vi.fn()
 
     class Workbook {
       constructor() { return workbook }
     }
-    await exportExcelReport(report, { loadExcelJs: async () => ({ Workbook }) })
+    await exportExcelReport(report, { loadExcelJs: async () => ({ Workbook }), saveFile })
 
     expect(rows).toContainEqual(['Pemasukan', 1000000])
     expect(rows).toContainEqual(['Makan', 'Pengeluaran', 769500])
     expect(cells.get('B6').numFmt).toContain('Rp')
+    expect(saveFile).toHaveBeenCalledWith(expect.objectContaining({
+      filename: 'laporan-satria-test-2026-09-01-2026-09-19.xlsx',
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }))
   })
 
-  it('formats PDF amounts in Indonesian Rupiah', async () => {
+  it('formats PDF amounts in Indonesian Rupiah and delegates saving', async () => {
     const document = {
       lastAutoTable: { finalY: 60 },
-      save: vi.fn(),
+      output: vi.fn(() => new ArrayBuffer(1)),
       setFontSize: vi.fn(),
       text: vi.fn(),
     }
     const autoTable = vi.fn()
+    const saveFile = vi.fn()
 
     await exportPdfReport(report, {
       loadAutoTable: async () => ({ default: autoTable }),
-      loadJsPdf: async () => ({
-        jsPDF: class JsPdf {
-          constructor() { return document }
-        },
-      }),
+      loadJsPdf: async () => ({ jsPDF: class JsPdf { constructor() { return document } } }),
+      saveFile,
     })
 
     expect(autoTable).toHaveBeenCalledWith(document, expect.objectContaining({
       body: expect.arrayContaining([['Pengeluaran', 'Rp769.500,00']]),
     }))
-    expect(document.save).toHaveBeenCalledWith('laporan-satria-test-2026-09-01-2026-09-19.pdf')
+    expect(saveFile).toHaveBeenCalledWith(expect.objectContaining({
+      filename: 'laporan-satria-test-2026-09-01-2026-09-19.pdf',
+      mimeType: 'application/pdf',
+    }))
   })
 
   it('uses English labels and filenames for an English export', async () => {
-    const document = { lastAutoTable: { finalY: 60 }, save: vi.fn(), setFontSize: vi.fn(), text: vi.fn() }
+    const document = {
+      lastAutoTable: { finalY: 60 },
+      output: vi.fn(() => new ArrayBuffer(1)),
+      setFontSize: vi.fn(),
+      text: vi.fn(),
+    }
     const autoTable = vi.fn()
+    const saveFile = vi.fn()
 
     await exportPdfReport({ ...report, locale: 'en' }, {
       loadAutoTable: async () => ({ default: autoTable }),
       loadJsPdf: async () => ({ jsPDF: class JsPdf { constructor() { return document } } }),
+      saveFile,
     })
 
     expect(document.text).toHaveBeenCalledWith('Financial summary', 14, 18)
     expect(autoTable).toHaveBeenCalledWith(document, expect.objectContaining({ head: [['Summary', 'Total']] }))
-    expect(document.save).toHaveBeenCalledWith('report-satria-test-2026-09-01-2026-09-19.pdf')
+    expect(saveFile).toHaveBeenCalledWith(expect.objectContaining({
+      filename: 'report-satria-test-2026-09-01-2026-09-19.pdf',
+    }))
   })
 })

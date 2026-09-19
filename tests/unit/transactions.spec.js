@@ -17,11 +17,11 @@ describe('transactions store', () => {
   it('keeps backend transaction strings and cursor pages intact', async () => {
     mocks.listTransactions
       .mockResolvedValueOnce({
-        data: [{ id: 'one', title: 'Makan', type: 'expense', amount: '25000.00' }],
+        data: [{ id: 201, title: 'Makan', type: 'expense', amount: '25000.00' }],
         page: { next_cursor: 'next' },
       })
       .mockResolvedValueOnce({
-        data: [{ id: 'two', title: 'Gaji', type: 'income', amount: '100000.00' }],
+        data: [{ id: 202, title: 'Gaji', type: 'income', amount: '100000.00' }],
         page: { next_cursor: null },
       })
     const transactions = useTransactionsStore()
@@ -39,11 +39,11 @@ describe('transactions store', () => {
   })
 
   it('forwards exact mutation payloads and versions without retry behavior', async () => {
-    mocks.createTransaction.mockResolvedValue({ id: 'created' })
-    mocks.updateTransaction.mockResolvedValue({ id: 'updated' })
+    mocks.createTransaction.mockResolvedValue({ id: 201 })
+    mocks.updateTransaction.mockResolvedValue({ id: 202 })
     mocks.deleteTransaction.mockResolvedValue(undefined)
     const transactions = useTransactionsStore()
-    const payload = { amount: '12.50', client_request_id: 'request-1' }
+    const payload = { amount: '12.50', client_request_id: 9001 }
 
     await transactions.create(payload)
     await transactions.update('updated', { amount: '12.50', version: 3 })

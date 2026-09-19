@@ -1,4 +1,5 @@
 import { request } from '../http'
+import { bigintIdPath } from '../../utils/ids'
 
 export function listActiveCategories() {
   return request('/categories?isDelete=false')
@@ -15,22 +16,22 @@ export function createCategory(payload) {
 }
 
 export function updateCategory(id, payload) {
-  return request(`/categories/${id}`, { body: payload, method: 'PATCH' })
+  return request(`/categories/${bigintIdPath(id)}`, { body: payload, method: 'PATCH' })
 }
 
 export function deleteCategory(id, version) {
-  return request(`/categories/${id}`, {
+  return request(`/categories/${bigintIdPath(id)}`, {
     headers: { 'If-Match': `"${version}"` },
     method: 'DELETE',
   })
 }
 
 export function getCategory(id, { isDelete = false } = {}) {
-  return request(`/categories/${id}?isDelete=${isDelete}`)
+  return request(`/categories/${bigintIdPath(id)}?isDelete=${isDelete}`)
 }
 
 export function restoreCategory(id, version) {
-  return request(`/categories/${id}/restore`, {
+  return request(`/categories/${bigintIdPath(id)}/restore`, {
     body: { version },
     method: 'POST',
   })

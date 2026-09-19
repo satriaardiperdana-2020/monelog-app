@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 
 import { translate } from '../i18n'
 import { useAppStore } from '../stores/app'
+import { createClientRequestId } from '../utils/ids'
 import { validateTransactionDraft } from '../utils/validation'
 
 const props = defineProps({
@@ -98,7 +99,7 @@ async function submit() {
     return
   }
 
-  if (!clientRequestId) clientRequestId = crypto.randomUUID()
+  if (!clientRequestId) clientRequestId = createClientRequestId()
   emit('submit', { ...result.value, client_request_id: clientRequestId })
 }
 </script>
