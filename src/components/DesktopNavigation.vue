@@ -7,7 +7,7 @@ import { RouterLink } from 'vue-router'
     <RouterLink class="desktop-navigation__brand" to="/">Catatan Keuangan</RouterLink>
     <nav class="desktop-navigation__links" aria-label="Navigasi utama">
       <RouterLink to="/">Utama</RouterLink>
-      <span aria-disabled="true">Laporan</span>
+      <RouterLink to="/laporan">Laporan</RouterLink>
       <RouterLink to="/pengaturan">Setelan</RouterLink>
     </nav>
   </aside>

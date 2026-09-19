@@ -7,6 +7,7 @@ export default [
     ignores: [
       'dist/**',
       'coverage/**',
+      'android/**',
       'playwright-report/**',
       'test-results/**',
     ],
